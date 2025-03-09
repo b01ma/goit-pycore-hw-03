@@ -1,49 +1,59 @@
 '''
-У межах вашої організації, ви відповідаєте за організацію привітань колег з днем народження. Щоб оптимізувати 
-цей процес, вам потрібно створити функцію get_upcoming_birthdays, яка допоможе вам визначати, кого з колег 
-потрібно привітати. Функція повинна повернути список всіх у кого день народження вперед на 7 днів включаючи поточний день.
+    У межах вашої організації, ви відповідаєте за організацію привітань колег з днем народження. Щоб оптимізувати 
+    цей процес, вам потрібно створити функцію get_upcoming_birthdays, яка допоможе вам визначати, кого з колег 
+    потрібно привітати. Функція повинна повернути список всіх у кого день народження вперед на 7 днів включаючи поточний день.
 
-У вашому розпорядженні є список users, кожен елемент якого містить інформацію про ім'я користувача та його 
-день народження. Оскільки дні народження колег можуть припадати на вихідні, ваша функція також повинна враховувати 
-це та переносити дату привітання на наступний робочий день, якщо необхідно.
-
-Вимоги до завдання:
-
-Параметр функції users - це список словників, де кожен словник містить ключі name (ім'я користувача, рядок) та 
-birthday (день народження, рядок у форматі 'рік.місяць.дата').
-Функція має визначати, чиї дні народження випадають вперед на 7 днів включаючи поточний день. Якщо день 
-народження припадає на вихідний, дата привітання переноситься на наступний понеділок.
-Функція повертає список словників, де кожен словник містить інформацію про користувача (ключ name) та 
-дату привітання (ключ congratulation_date, дані якого у форматі рядка 'рік.місяць.дата').
-
-
-Рекомендації для виконання:
-
-Припускаємо, що ви отримали список users, де кожен словник містить name (ім'я користувача) та birthday 
-(дата народження у форматі рядка 'рік.місяць.дата'). Ви повинні перетворити дати народження з рядків у 
-об'єкти datetime. Конвертуйте дату народження із рядка у datetime об'єкт - datetime.strptime(user["birthday"], 
-"%Y.%m.%d").date(). Оскільки потрібна лише дата (без часу), використовуйте .date() для отримання тільки дати.
-Визначте поточну дату системи за допомогою datetime.today().date().
-Пройдіться по списку users та аналізуйте дати народження кожного користувача (for user in users:).
-Перевірте, чи вже минув день народження в цьому році (if birthday_this_year < today). Якщо так, розгляньте дату на наступний рік.
-Визначте різницю між днем народження та поточним днем для визначення днів народження на наступний тиждень.
-Перевірте, чи день народження припадає на вихідний. Якщо так, перенесіть дату привітання на наступний понеділок.
-Створіть структуру даних, яка зберігатиме ім'я користувача та відповідну дату привітання, якщо день народження відбувається протягом наступного тижня.
-Виведіть зібрані дані у вигляді списку словників з іменами користувачів та датами привітань.
-
+    У вашому розпорядженні є список users, кожен елемент якого містить інформацію про ім'я користувача та його 
+    день народження. Оскільки дні народження колег можуть припадати на вихідні, ваша функція також повинна враховувати 
+    це та переносити дату привітання на наступний робочий день, якщо необхідно.
 '''
+import datetime as dt
+from datetime import datetime as dtdt
 
 def get_upcoming_birthdays(users: list) -> list:
-    print(users)
-    
-    
-    
+    '''
+        Function returns a list of users who have a birthday in the next 7 days
+        :param users: List of dictionaries with user name and birthday
+        :return: List of dictionaries with user name and congratulation date
+    '''
     result = []
+    if not users:
+        return result
+    
+    today = dtdt.today().date()
+    current_year = today.year
+    
+    days_to_monday = (7 - today.weekday()) % 7 
+    next_monday = today + dt.timedelta(days=days_to_monday)
+    next_friday = next_monday + dt.timedelta(days=4)
+    days_to_next_friday = next_friday - today
+    
+    for user in users:
+
+        try:
+            name = user['name']
+            birthday_str = user['birthday']
+            if not birthday_str or not name:
+                continue
+            birthday_obj = dtdt.strptime(birthday_str, "%Y.%m.%d").date()
+        except ValueError as e:
+            print(f'Invalid date format for user {name}: {e}')
+            continue
+        
+        birthday_this_year = dtdt(current_year, birthday_obj.month, birthday_obj.day).date()
+
+        if birthday_this_year < today:
+            birthday_this_year = dtdt(current_year + 1, birthday_obj.month, birthday_obj.day).date()
+        
+        days_to_birthday = birthday_this_year - today
+        day_of_birthday = birthday_this_year.weekday()
+        
+        if days_to_birthday < days_to_next_friday:
+            congratulation_date = birthday_this_year
+            if day_of_birthday == 5 or day_of_birthday == 6:
+                congratulation_date = next_monday
+            
+            result.append({'name': name, 'congratulation_date': congratulation_date.strftime("%Y.%m.%d")})
+
     return result
     
-
-users = [
-    {"name": "John Doe", "birthday": "1985.01.23"},
-    {"name": "Jane Smith", "birthday": "1990.01.27"}
-]
-print(get_upcoming_birthdays(users))
