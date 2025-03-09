@@ -10,37 +10,40 @@
     тільки цифри та символ '+' на початку. Функція приймає один аргумент - рядок з телефонним номером у будь-якому форматі 
     та перетворює його на стандартний формат, залишаючи тільки цифри та символ '+'. Якщо номер не містить міжнародного коду, 
     функція автоматично додає код '+38' (для України). Це гарантує, що всі номери будуть придатними для відправлення SMS.
-    
-    Вимоги до завдання:
-
-    Параметр функції phone_number - це рядок з телефонним номером у різноманітних форматах.
-    Функція видаляє всі символи, крім цифр та символу '+'.
-    Якщо міжнародний код відсутній, функція додає код '+38'. Це враховує випадки, коли номер починається з '380' 
-    (додається лише '+') та коли номер починається без коду (додається '+38').
-    Функція повертає нормалізований телефонний номер у вигляді рядка.
-
-    Рекомендації для виконання:
-
-    Використовуйте модуль re для регулярних виразів для видалення непотрібних символів.
-    Перевірте, чи номер починається з '+', і виправте префікс згідно з вказівками.
-    Видаліть всі символи, крім цифр та '+', з номера телефону.
-    На забувайте повертати нормалізований номер телефону з функції.
 '''
 
-print('===== START ====')
-print('')
-print('')
 
-def normalize_phone(phone_number):
-    print(phone_number)
+import re
+
+def normalize_phone(phone_number: str) -> str:
     
-    return ''
+    '''
+        Function receives a phone number and transforms into the valid format
+        
+        :params phone_number: string with phone number in any format
+        :return: string with phone number in format '+380XXXXXXXXX'
+    '''
+    #Solution #1
+    striped_phone = re.sub(r'[^\d+]', '', phone_number).strip()
+    final_phone_number = ''
     
-
-result = normalize_phone('050-995-59-59')
-print(result)
-
-
-print('')
-print('')
-print('==== END ====')
+    if striped_phone.startswith('+38'):
+        final_phone_number = striped_phone
+    elif (len(striped_phone) == 12): 
+        final_phone_number = f'+{striped_phone}'
+    elif (len(striped_phone) == 10):
+        final_phone_number = f'+38{striped_phone}'
+    elif (len(striped_phone) == 9):
+        final_phone_number = f'+380{striped_phone}'
+    else:
+        print('Phone number is not valid')
+        return ''
+    
+    # Solution #2
+    # trimmed_phone_number =  re.sub(r'\D', '', phone_number)
+    # phone_number_no_country_code = trimmed_phone_number[-9:]
+    # country_code = '+380'
+    
+    # final_phone_number = country_code + phone_number_no_country_code
+    
+    return final_phone_number
